@@ -21,3 +21,7 @@
 
 - 有内推码/内推链接：来源表页包含「内推」，或字段中提取到内推码/内推链接。
 - 无内推码：来源表页为「非内推」或未提取到内推信息的岗位。
+
+- 
+来自https://github.com/nenhaotan-png/job-card-collection
+可直接访问  https://changmingchao.github.io/job-card-collection/
