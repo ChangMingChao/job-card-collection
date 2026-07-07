@@ -1,0 +1,2640 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>简历投递工作台</title>
+  <style>
+    :root {
+      --bg: #f6f7f8;
+      --panel: #ffffff;
+      --text: #202327;
+      --muted: #68717d;
+      --line: #dfe3e8;
+      --blue: #246bfe;
+      --green: #138a5b;
+      --orange: #b75d12;
+      --red: #b3261e;
+      --ink: #111827;
+      --shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: static;
+      top: auto;
+      z-index: 10;
+      background: rgba(246, 247, 248, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 24px 14px;
+    }
+
+    .title-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 750;
+    }
+
+    .source {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .source a {
+      color: var(--blue);
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(110px, 1fr));
+      gap: 8px;
+      min-width: 390px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--ink);
+      font-size: 21px;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(240px, 1.2fr) repeat(3, minmax(150px, 0.55fr));
+      gap: 10px;
+      align-items: center;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 0 12px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input, select {
+      height: 38px;
+    }
+
+    textarea {
+      min-height: 92px;
+      padding: 10px 12px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(36, 107, 254, 0.12);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #eef1f4;
+    }
+
+    .segmented button {
+      height: 30px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .segmented button.active {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 1px 4px rgba(17, 24, 39, 0.1);
+    }
+
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 24px 42px;
+    }
+
+    .result-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toggle {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--blue);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+      border: 1px solid #e2e7ee;
+      border-radius: 8px;
+      box-shadow: 0 12px 28px rgba(17, 24, 39, 0.07);
+      overflow: hidden;
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: #9aa4b2;
+    }
+
+    .card.has-referral::before {
+      background: var(--green);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: #c8d3e0;
+      box-shadow: 0 18px 42px rgba(17, 24, 39, 0.1);
+    }
+
+    .card-head {
+      padding: 16px 16px 12px 18px;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 22px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid transparent;
+    }
+
+    .badge.ref { color: #0f6f49; background: #e8f5ef; border-color: #c8e7d8; }
+    .badge.none { color: #526070; background: #f1f4f7; border-color: #dce3ea; }
+    .badge.sheet { color: #995014; background: #fff4e8; border-color: #f2d2b5; }
+    .badge.manual { color: #004f7a; background: #e8f7ff; border-color: #bce6ff; }
+
+    .company {
+      margin: 0 0 7px;
+      font-size: 19px;
+      line-height: 1.25;
+      font-weight: 750;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .role {
+      margin: 0;
+      color: #3a424d;
+      font-size: 14px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-body {
+      flex: 1;
+      padding: 12px 16px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid #edf0f4;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .meta-item {
+      min-height: 50px;
+      padding: 9px 10px 8px 0;
+      overflow: hidden;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .meta-item:nth-child(odd) {
+      border-right: 1px solid #edf0f4;
+    }
+
+    .meta-item:nth-child(even) {
+      padding-left: 10px;
+    }
+
+    .meta-item:nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+
+    .meta-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: #2d3540;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .referral {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 11px;
+      border: 1px solid #c7e7d8;
+      border-radius: 8px;
+      background: #f2fbf7;
+      color: var(--green);
+      font-size: 13px;
+    }
+
+    .referral.link {
+      border-color: #bfd0ff;
+      background: #f0f4ff;
+      color: var(--blue);
+    }
+
+    .referral code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: var(--green);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .copy-btn {
+      border: 1px solid #9ed4ba;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--green);
+      height: 28px;
+      padding: 0 8px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .referral.link a {
+      color: var(--blue);
+      font-weight: 650;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .note {
+      color: #3c4652;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 2px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      line-height: 1.2;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+      font-weight: 650;
+    }
+
+    .btn.disabled {
+      color: #8a939e;
+      background: #f3f5f7;
+      pointer-events: none;
+    }
+
+    .detail-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .chevron {
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg) translateY(-2px);
+      transition: transform 160ms ease;
+    }
+
+    .detail-toggle[aria-expanded="true"] .chevron {
+      transform: rotate(225deg) translateY(-1px);
+    }
+
+    .inline-detail {
+      display: none;
+      margin-top: 2px;
+      border-top: 1px solid #e7ecf2;
+      padding-top: 12px;
+    }
+
+    .inline-detail.open {
+      display: block;
+    }
+
+    .detail-section + .detail-section {
+      margin-top: 14px;
+    }
+
+    .detail-section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: #111827;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .detail-section-title::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 1px;
+      border: 1px solid #edf0f4;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #edf0f4;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: 118px minmax(0, 1fr);
+      gap: 10px;
+      padding: 9px 10px;
+      background: #ffffff;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-value {
+      color: #27313d;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-value a {
+      display: block;
+      color: var(--blue);
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    dialog {
+      width: min(860px, calc(100vw - 32px));
+      max-height: min(760px, calc(100vh - 32px));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0;
+      box-shadow: 0 24px 80px rgba(17, 24, 39, 0.24);
+    }
+
+    dialog::backdrop { background: rgba(17, 24, 39, 0.42); }
+
+    .dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dialog-head h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .dialog-body {
+      padding: 14px 16px 18px;
+      overflow: auto;
+      max-height: calc(100vh - 140px);
+    }
+
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .field-table th,
+    .field-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      vertical-align: top;
+      text-align: left;
+      line-height: 1.45;
+    }
+
+    .field-table th {
+      width: 180px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .field-table td {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      padding: 46px 12px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    @media (max-width: 1120px) {
+      .title-row { grid-template-columns: 1fr; }
+      .stats { min-width: 0; }
+      .controls { grid-template-columns: 1fr 1fr; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      .topbar-inner, main { padding-left: 14px; padding-right: 14px; }
+      .filter-shell { padding-left: 14px; padding-right: 14px; }
+      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .stat { padding: 8px; }
+      .stat strong { font-size: 18px; }
+      .controls { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .result-bar { align-items: flex-start; flex-direction: column; }
+      .meta { grid-template-columns: 1fr; }
+      .meta-item,
+      .meta-item:nth-child(odd),
+      .meta-item:nth-child(even) {
+        padding-left: 0;
+        border-right: 0;
+      }
+      .meta-item:nth-last-child(-n + 2) {
+        border-bottom: 1px solid #edf0f4;
+      }
+      .meta-item:last-child {
+        border-bottom: 0;
+      }
+      .detail-row { grid-template-columns: 1fr; gap: 4px; }
+      .actions { grid-template-columns: 1fr; }
+      h1 { font-size: 20px; }
+    }
+
+    /* SpaceX-inspired mission-control skin: black field, uppercase navigation, high-contrast cards. */
+    :root {
+      --bg: #050505;
+      --panel: #0b0b0b;
+      --text: #f7f7f7;
+      --muted: #9b9b9b;
+      --line: rgba(255, 255, 255, 0.18);
+      --blue: #ffffff;
+      --green: #ffffff;
+      --orange: #b8b8b8;
+      --red: #ff5b5b;
+      --ink: #ffffff;
+      --shadow: none;
+    }
+
+    body {
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.18), #050505 420px),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 130px),
+        #050505;
+      color: #ffffff;
+      text-transform: none;
+    }
+
+    .topbar {
+      background: rgba(0, 0, 0, 0.88);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .topbar-inner {
+      padding-top: 26px;
+      padding-bottom: 18px;
+    }
+
+    h1 {
+      max-width: 860px;
+      font-size: clamp(31px, 4.2vw, 58px);
+      line-height: 0.94;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1::before {
+      content: "MISSION CONTROL / RECRUITING OPS";
+      display: block;
+      margin-bottom: 10px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .source {
+      margin-top: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stats {
+      gap: 10px;
+    }
+
+    .stat {
+      min-height: 76px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 0;
+      padding: 13px 14px;
+    }
+
+    .stat strong {
+      color: #ffffff;
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .stat span {
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      height: 42px;
+      border-radius: 0;
+      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(0, 0, 0, 0.72);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.48);
+    }
+
+    input:focus, select:focus {
+      border-color: #ffffff;
+      box-shadow: inset 0 0 0 1px #ffffff;
+    }
+
+    select option {
+      background: #050505;
+      color: #ffffff;
+    }
+
+    .segmented {
+      border-radius: 0;
+      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px;
+    }
+
+    .segmented button {
+      height: 34px;
+      border-radius: 0;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .segmented button.active {
+      background: #ffffff;
+      color: #050505;
+      box-shadow: none;
+    }
+
+    main {
+      padding-top: 24px;
+    }
+
+    .result-bar {
+      color: rgba(255, 255, 255, 0.64);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .toggle input {
+      accent-color: #ffffff;
+    }
+
+    .grid {
+      gap: 18px;
+    }
+
+    .card {
+      background: rgba(8, 8, 8, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .card::before {
+      width: 2px;
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .card.has-referral::before {
+      background: #ffffff;
+    }
+
+    .card:hover {
+      transform: none;
+      border-color: rgba(255, 255, 255, 0.55);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+    }
+
+    .card-head {
+      padding: 18px 18px 14px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .badge {
+      height: 22px;
+      border-radius: 0;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .badge.ref {
+      color: #050505;
+      background: #ffffff;
+      border-color: #ffffff;
+    }
+
+    .badge.none, .badge.sheet {
+      color: rgba(255, 255, 255, 0.78);
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    .company {
+      color: #ffffff;
+      font-size: 20px;
+      line-height: 1.12;
+      font-weight: 800;
+    }
+
+    .role {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+    }
+
+    .card-body {
+      padding: 14px 18px 18px 20px;
+    }
+
+    .meta {
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .meta-item,
+    .meta-item:nth-child(odd),
+    .meta-item:nth-child(even),
+    .meta-item:nth-last-child(-n + 2) {
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .meta-item span,
+    .detail-label,
+    .field-table th {
+      color: rgba(255, 255, 255, 0.52);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .meta-item strong,
+    .detail-value,
+    .field-table td {
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .referral,
+    .referral.link {
+      border-radius: 0;
+      border-color: rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.065);
+      color: #ffffff;
+    }
+
+    .referral code {
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .copy-btn {
+      border-radius: 0;
+      border-color: #ffffff;
+      background: transparent;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .referral.link a,
+    .detail-value a,
+    .field-table a {
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .note {
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 12px;
+    }
+
+    .btn {
+      min-height: 40px;
+      border-radius: 0;
+      border-color: #ffffff;
+      background: transparent;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .btn.primary {
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+
+    .btn.primary::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 100%;
+      background: #ffffff;
+      transform: translateY(100%);
+      transition: transform 180ms ease;
+      z-index: -1;
+    }
+
+    .btn.primary:hover::before {
+      transform: translateY(0);
+    }
+
+    .btn.primary:hover {
+      color: #050505;
+    }
+
+    .btn.disabled {
+      color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .inline-detail {
+      border-top-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .detail-section-title {
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .detail-section-title::before {
+      width: 20px;
+      height: 1px;
+      border-radius: 0;
+      background: #ffffff;
+    }
+
+    .detail-list {
+      border-radius: 0;
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .detail-row {
+      background: rgba(10, 10, 10, 0.98);
+    }
+
+    dialog {
+      background: #080808;
+      color: #ffffff;
+      border-radius: 0;
+      border-color: rgba(255, 255, 255, 0.32);
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.74);
+    }
+
+    .dialog-head {
+      border-bottom-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .close-btn {
+      border-radius: 0;
+      background: transparent;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .field-table th,
+    .field-table td {
+      border-bottom-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .empty {
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.62);
+      border-radius: 0;
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    @media (max-width: 720px) {
+      h1 {
+        font-size: 34px;
+      }
+
+      h1::before {
+        font-size: 10px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Apple-inspired application workspace: calm surfaces, clear hierarchy, direct actions. */
+    :root {
+      --bg: #f5f5f7;
+      --panel: #ffffff;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --line: rgba(0, 0, 0, 0.1);
+      --blue: #0071e3;
+      --green: #248a3d;
+      --orange: #bf5b00;
+      --red: #d70015;
+      --ink: #1d1d1f;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+
+    .topbar {
+      background: rgba(245, 245, 247, 0.86);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: none;
+    }
+
+    .topbar-inner {
+      padding-top: 24px;
+      padding-bottom: 18px;
+    }
+
+    h1 {
+      max-width: none;
+      font-size: clamp(34px, 4.6vw, 64px);
+      line-height: 1.05;
+      color: #1d1d1f;
+      font-weight: 760;
+      text-transform: none;
+    }
+
+    h1::before {
+      content: "把机会整理成可执行的投递队列";
+      display: block;
+      margin-bottom: 10px;
+      color: #6e6e73;
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .source {
+      color: #6e6e73;
+      font-size: 13px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .stat {
+      min-height: 78px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat strong {
+      color: #1d1d1f;
+      font-size: 28px;
+      font-weight: 760;
+    }
+
+    .stat span {
+      color: #6e6e73;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .controls {
+      grid-template-columns: minmax(260px, 1.25fr) minmax(230px, 0.7fr) repeat(3, minmax(145px, 0.45fr)) auto auto;
+      gap: 10px;
+    }
+
+    .filter-reset,
+    .add-job-button {
+      height: 44px;
+      border: 0;
+      border-radius: 8px;
+      background: #1d1d1f;
+      color: #ffffff;
+      padding: 0 16px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .add-job-button {
+      background: linear-gradient(135deg, #0071e3, #0a84ff);
+      box-shadow: 0 10px 22px rgba(0, 113, 227, 0.18);
+    }
+
+    input, select, textarea {
+      height: 44px;
+      border-radius: 8px;
+      border-color: rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.9);
+      color: #1d1d1f;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    textarea {
+      height: auto;
+      min-height: 98px;
+    }
+
+    input::placeholder {
+      color: #86868b;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(0, 113, 227, 0.6);
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.14);
+    }
+
+    select option {
+      background: #ffffff;
+      color: #1d1d1f;
+    }
+
+    .segmented {
+      border-radius: 8px;
+      border-color: rgba(0, 0, 0, 0.08);
+      background: rgba(0, 0, 0, 0.045);
+      padding: 4px;
+    }
+
+    .segmented button {
+      height: 34px;
+      border-radius: 7px;
+      color: #6e6e73;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .segmented button.active {
+      background: #ffffff;
+      color: #1d1d1f;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .result-bar {
+      color: #6e6e73;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .toggle input {
+      accent-color: #0071e3;
+    }
+
+    .grid {
+      gap: 18px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.08);
+    }
+
+    .card::before {
+      width: 0;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 0, 0, 0.12);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.11);
+    }
+
+    .card-head {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .badge {
+      height: 23px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .badge.ref {
+      color: #1d642f;
+      background: #e9f7ec;
+      border-color: #c9e9d0;
+    }
+
+    .badge.none {
+      color: #6e6e73;
+      background: #f5f5f7;
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .badge.sheet,
+    .badge.status,
+    .badge.manual {
+      color: #1d1d1f;
+      background: #f5f5f7;
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .badge.status.applied {
+      color: #6a4000;
+      background: #fff4d6;
+      border-color: #f1d083;
+    }
+
+    .badge.status.saved {
+      color: #0057a8;
+      background: #eaf4ff;
+      border-color: #bfddff;
+    }
+
+    .badge.status.ready {
+      color: #0057a8;
+      background: #eaf4ff;
+      border-color: #bfddff;
+    }
+
+    .badge.status.written,
+    .badge.status.interview {
+      color: #6a4000;
+      background: #fff4d6;
+      border-color: #f1d083;
+    }
+
+    .badge.status.offer {
+      color: #0b5c25;
+      background: #e8fff0;
+      border-color: rgba(48, 209, 88, 0.28);
+    }
+
+    .badge.status.rejected,
+    .badge.status.paused {
+      color: #6e6e73;
+      background: #eeeeef;
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .badge.priority.high {
+      color: #8a3300;
+      background: #fff1df;
+      border-color: rgba(255, 149, 0, 0.26);
+    }
+
+    .badge.priority.medium {
+      color: #0057a8;
+      background: #eaf4ff;
+      border-color: #bfddff;
+    }
+
+    .badge.priority.low {
+      color: #55515c;
+      background: #f2f0f7;
+      border-color: rgba(175, 82, 222, 0.18);
+    }
+
+    .company {
+      color: #1d1d1f;
+      font-size: 21px;
+      line-height: 1.18;
+      font-weight: 720;
+    }
+
+    .role {
+      color: #424245;
+      font-size: 14px;
+    }
+
+    .card-body {
+      padding: 14px 18px 18px;
+    }
+
+    .meta {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .meta-item,
+    .meta-item:nth-child(odd),
+    .meta-item:nth-child(even),
+    .meta-item:nth-last-child(-n + 2) {
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .meta-item {
+      background: #fbfbfd;
+      padding: 10px;
+    }
+
+    .meta-item span,
+    .detail-label,
+    .field-table th {
+      color: #86868b;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .meta-item strong,
+    .detail-value,
+    .field-table td {
+      color: #1d1d1f;
+    }
+
+    .referral,
+    .referral.link {
+      border-radius: 8px;
+      border-color: rgba(0, 0, 0, 0.08);
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+
+    .referral code {
+      color: #1d1d1f;
+      font-weight: 700;
+    }
+
+    .copy-btn {
+      border-radius: 999px;
+      border-color: transparent;
+      background: #0071e3;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0;
+      text-transform: none;
+      padding: 0 12px;
+    }
+
+    .referral.link a,
+    .detail-value a,
+    .field-table a {
+      color: #0066cc;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .note {
+      color: #6e6e73;
+      font-size: 13px;
+    }
+
+    .actions {
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+
+    .workflow-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .card-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mini-select {
+      min-width: 0;
+      height: 40px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 650;
+      text-align: center;
+      text-align-last: center;
+      padding: 0 28px 0 12px;
+    }
+
+    .queue-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(18px) saturate(150%);
+    }
+
+    .queue-title {
+      margin: 0 0 5px;
+      color: #1d1d1f;
+      font-size: 16px;
+      font-weight: 760;
+    }
+
+    .queue-meta {
+      margin: 0;
+      color: #6e6e73;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .queue-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .queue-button {
+      min-height: 38px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 14px;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .queue-button.active {
+      background: linear-gradient(135deg, #0071e3, #0a84ff);
+      color: #ffffff;
+      box-shadow: 0 10px 22px rgba(0, 113, 227, 0.2);
+    }
+
+    .duplicate-note {
+      color: #6e6e73;
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: -2px;
+    }
+
+    .btn {
+      min-height: 40px;
+      border-radius: 999px;
+      border-color: transparent;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .btn.primary {
+      background: #0071e3;
+      color: #ffffff;
+      border-color: #0071e3;
+    }
+
+    .btn.primary::before {
+      display: none;
+    }
+
+    .btn.primary:hover {
+      color: #ffffff;
+      background: #0077ed;
+    }
+
+    .btn.disabled {
+      color: #86868b;
+      background: #eeeeef;
+      border-color: transparent;
+    }
+
+    .btn.is-active {
+      background: #1d1d1f;
+      color: #ffffff;
+    }
+
+    dialog {
+      background: #ffffff;
+      color: #1d1d1f;
+      border-radius: 8px;
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.22);
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(10px);
+    }
+
+    .dialog-head {
+      border-bottom-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .close-btn {
+      border-radius: 999px;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      border-color: transparent;
+    }
+
+    .field-table th,
+    .field-table td {
+      border-bottom-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .dialog-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .manual-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .manual-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .manual-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .manual-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .manual-field label {
+      color: #6e6e73;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .manual-hint {
+      margin: 0;
+      color: #6e6e73;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .manual-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .empty {
+      background: #ffffff;
+      color: #6e6e73;
+      border-radius: 8px;
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 1120px) {
+      .controls {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      h1 {
+        font-size: 38px;
+      }
+
+      h1::before {
+        font-size: 13px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .stat {
+        min-height: 74px;
+      }
+
+      .workflow-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .card-controls,
+      .queue-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .queue-actions {
+        justify-content: stretch;
+      }
+
+      .queue-button {
+        flex: 1 1 auto;
+      }
+
+      .dialog-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .manual-form-grid,
+      .manual-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-reset,
+      .add-job-button {
+        width: 100%;
+      }
+    }
+
+    /* More Apple product-page color: soft color fields, frosted controls, vivid but restrained accents. */
+    body {
+      background:
+        radial-gradient(circle at 18% 4%, rgba(0, 113, 227, 0.22), transparent 31%),
+        radial-gradient(circle at 72% 2%, rgba(191, 90, 242, 0.18), transparent 28%),
+        linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 42%, #ffffff 100%);
+    }
+
+    .topbar {
+      background: rgba(251, 251, 253, 0.72);
+      backdrop-filter: blur(24px) saturate(150%);
+    }
+
+    h1 {
+      background: linear-gradient(90deg, #1d1d1f 0%, #0071e3 38%, #af52de 72%, #ff9500 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    h1::before {
+      color: #6e6e73;
+      background: none;
+      -webkit-background-clip: initial;
+      background-clip: initial;
+    }
+
+    .stat {
+      position: relative;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(150%);
+    }
+
+    .stat::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 3px;
+      background: linear-gradient(90deg, #0071e3, #af52de);
+    }
+
+    .stat:nth-child(2)::after {
+      background: linear-gradient(90deg, #30d158, #64d2ff);
+    }
+
+    .stat:nth-child(3)::after {
+      background: linear-gradient(90deg, #ff9f0a, #ff375f);
+    }
+
+    input, select, .segmented {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(18px) saturate(150%);
+    }
+
+    .card {
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.78)),
+        #ffffff;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: auto;
+      height: 5px;
+      background: linear-gradient(90deg, #0071e3, #64d2ff, #af52de);
+      opacity: 0.9;
+    }
+
+    .card.no-referral::before {
+      background: linear-gradient(90deg, #ff9f0a, #ffcc00, #ff375f);
+    }
+
+    .card.has-referral::before {
+      background: linear-gradient(90deg, #30d158, #64d2ff, #0071e3);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      right: -46px;
+      top: -54px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 113, 227, 0.13), transparent 68%);
+      pointer-events: none;
+    }
+
+    .card.no-referral::after {
+      background: radial-gradient(circle, rgba(255, 149, 0, 0.15), transparent 68%);
+    }
+
+    .badge.ref {
+      color: #0b5c25;
+      background: linear-gradient(135deg, #e8fff0, #d9f8ff);
+      border-color: rgba(48, 209, 88, 0.28);
+    }
+
+    .badge.none {
+      color: #7a3b00;
+      background: linear-gradient(135deg, #fff4dc, #ffe8ef);
+      border-color: rgba(255, 159, 10, 0.24);
+    }
+
+    .badge.sheet {
+      color: #4b3f72;
+      background: #f0edff;
+      border-color: rgba(175, 82, 222, 0.18);
+    }
+
+    .badge.manual {
+      color: #004f7a;
+      background: linear-gradient(135deg, #e4f7ff, #eaf4ff);
+      border-color: rgba(100, 210, 255, 0.32);
+    }
+
+    .badge.status {
+      color: #3a3a3c;
+      background: #f5f5f7;
+    }
+
+    .badge.status.ready,
+    .badge.status.saved {
+      color: #0057a8;
+      background: #eaf4ff;
+      border-color: #bfddff;
+    }
+
+    .badge.status.applied,
+    .badge.status.written,
+    .badge.status.interview {
+      color: #6a4000;
+      background: #fff4d6;
+      border-color: #f1d083;
+    }
+
+    .badge.status.offer {
+      color: #0b5c25;
+      background: #e8fff0;
+      border-color: rgba(48, 209, 88, 0.28);
+    }
+
+    .badge.status.rejected,
+    .badge.status.paused {
+      color: #6e6e73;
+      background: #eeeeef;
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .badge.priority.high {
+      color: #8a3300;
+      background: #fff1df;
+      border-color: rgba(255, 149, 0, 0.26);
+    }
+
+    .badge.priority.medium {
+      color: #0057a8;
+      background: #eaf4ff;
+      border-color: #bfddff;
+    }
+
+    .badge.priority.low {
+      color: #55515c;
+      background: #f2f0f7;
+      border-color: rgba(175, 82, 222, 0.18);
+    }
+
+    .company {
+      color: #111114;
+    }
+
+    .meta {
+      background: rgba(245, 245, 247, 0.6);
+    }
+
+    .meta-item {
+      background: rgba(255, 255, 255, 0.58);
+    }
+
+    .referral {
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.12), rgba(100, 210, 255, 0.16));
+      border-color: rgba(48, 209, 88, 0.24);
+    }
+
+    .referral.link {
+      background: linear-gradient(135deg, rgba(0, 113, 227, 0.1), rgba(175, 82, 222, 0.13));
+      border-color: rgba(0, 113, 227, 0.2);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #0071e3, #0a84ff);
+      border-color: transparent;
+      box-shadow: 0 10px 22px rgba(0, 113, 227, 0.22);
+    }
+
+    .btn.primary:hover {
+      background: linear-gradient(135deg, #0077ed, #2997ff);
+    }
+
+    .btn {
+      background: rgba(245, 245, 247, 0.84);
+    }
+
+    .btn.is-active {
+      background: linear-gradient(135deg, #1d1d1f, #4a4a4f);
+    }
+
+    .copy-btn {
+      background: linear-gradient(135deg, #0071e3, #0a84ff);
+    }
+
+    dialog {
+      background:
+        radial-gradient(circle at 15% 0%, rgba(0, 113, 227, 0.12), transparent 30%),
+        radial-gradient(circle at 90% 4%, rgba(175, 82, 222, 0.1), transparent 28%),
+        #ffffff;
+    }
+
+    .controls {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      padding: 10px 0;
+      background: rgba(251, 251, 253, 0.82);
+      backdrop-filter: blur(22px) saturate(150%);
+      border-radius: 8px;
+    }
+
+    .controls::before {
+      content: "";
+      position: absolute;
+      inset: 0 calc(50% - 50vw);
+      z-index: -1;
+      background: rgba(251, 251, 253, 0.82);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(22px) saturate(150%);
+    }
+
+    .filter-shell {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      padding: 0 24px;
+      background: rgba(251, 251, 253, 0.82);
+      backdrop-filter: blur(22px) saturate(150%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .filter-shell .controls {
+      position: relative;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="title-row">
+          <div>
+            <h1 id="pageTitle">简历投递工作台</h1>
+            <div class="source" id="sourceLine"></div>
+          </div>
+          <div class="stats" aria-label="统计">
+            <div class="stat"><strong id="statTotal">0</strong><span>全部机会</span></div>
+            <div class="stat"><strong id="statReferral">0</strong><span>含内推</span></div>
+            <div class="stat"><strong id="statNoReferral">0</strong><span>普通投递</span></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="filter-shell">
+      <div class="controls">
+        <input id="searchInput" type="search" placeholder="搜索公司、岗位、城市、行业、内推码">
+        <div class="segmented" aria-label="内推分类">
+          <button class="active" data-category="all">全部</button>
+          <button data-category="has_referral">有内推</button>
+          <button data-category="no_referral">普通投递</button>
+        </div>
+        <select id="sheetFilter" aria-label="来源表页"></select>
+        <select id="sortSelect" aria-label="排序">
+          <option value="updated">最近更新</option>
+          <option value="deadline">截止时间</option>
+          <option value="company">公司名称</option>
+        </select>
+        <select id="statusFilter" aria-label="收藏筛选">
+          <option value="all">全部收藏</option>
+          <option value="saved">已收藏</option>
+          <option value="unsaved">未收藏</option>
+        </select>
+        <button class="filter-reset" id="resetFilters" type="button">重置筛选</button>
+        <button class="add-job-button" id="openManualForm" type="button">添加岗位</button>
+      </div>
+    </div>
+
+    <main>
+      <div class="result-bar">
+        <div id="resultCount">正在加载岗位...</div>
+        <label class="toggle">
+          <input type="checkbox" id="directOnly">
+          仅看可直达投递
+        </label>
+      </div>
+      <section id="cards" class="grid" aria-live="polite"></section>
+      <div id="emptyState" class="empty" hidden>当前筛选下没有匹配岗位。</div>
+    </main>
+  </div>
+
+  <dialog id="detailDialog">
+    <div class="dialog-head">
+      <h2 id="dialogTitle"></h2>
+      <button class="close-btn" id="dialogClose" aria-label="关闭">×</button>
+    </div>
+    <div class="dialog-body" id="dialogBody"></div>
+  </dialog>
+
+  <dialog id="manualDialog">
+    <div class="dialog-head">
+      <h2>手动添加岗位</h2>
+      <button class="close-btn" id="manualClose" aria-label="关闭">×</button>
+    </div>
+    <div class="dialog-body">
+      <form id="manualForm" class="manual-form">
+        <p class="manual-hint">添加后会立即进入卡片列表，并标记为“手动”。这些内容保存在当前浏览器里。</p>
+        <div class="manual-form-grid">
+          <div class="manual-field">
+            <label for="manualCompany">公司名称</label>
+            <input id="manualCompany" name="company" required placeholder="例如：腾讯">
+          </div>
+          <div class="manual-field">
+            <label for="manualRole">岗位/JD</label>
+            <input id="manualRole" name="role" required placeholder="例如：产品经理实习生">
+          </div>
+          <div class="manual-field">
+            <label for="manualApplyUrl">投递链接</label>
+            <input id="manualApplyUrl" name="applyUrl" type="url" placeholder="https://">
+          </div>
+          <div class="manual-field">
+            <label for="manualSourceUrl">岗位来源链接</label>
+            <input id="manualSourceUrl" name="sourceUrl" type="url" placeholder="默认使用腾讯文档来源">
+          </div>
+          <div class="manual-field">
+            <label for="manualCategory">投递类型</label>
+            <select id="manualCategory" name="category">
+              <option value="no_referral">普通投递</option>
+              <option value="has_referral">有内推</option>
+            </select>
+          </div>
+          <div class="manual-field">
+            <label for="manualDeadline">截止/时间</label>
+            <input id="manualDeadline" name="deadline" placeholder="例如：2026-07-15 / 招满为止">
+          </div>
+          <div class="manual-field">
+            <label for="manualLocation">地点</label>
+            <input id="manualLocation" name="location" placeholder="例如：深圳 / 远程">
+          </div>
+          <div class="manual-field">
+            <label for="manualIndustry">行业</label>
+            <input id="manualIndustry" name="industry" placeholder="例如：互联网">
+          </div>
+          <div class="manual-field">
+            <label for="manualJobType">类型/对象</label>
+            <input id="manualJobType" name="jobType" placeholder="例如：实习 / 秋招 / 2027届">
+          </div>
+          <div class="manual-field">
+            <label for="manualReferralCode">内推码</label>
+            <input id="manualReferralCode" name="referralCode" placeholder="没有可不填">
+          </div>
+          <div class="manual-field full">
+            <label for="manualReferralLink">内推链接</label>
+            <input id="manualReferralLink" name="referralLink" type="url" placeholder="https://">
+          </div>
+          <div class="manual-field full">
+            <label for="manualNote">补充信息</label>
+            <textarea id="manualNote" name="note" placeholder="JD、要求、备注、投递提醒等"></textarea>
+          </div>
+        </div>
+        <div class="manual-actions">
+          <button class="btn" id="manualCancel" type="button">取消</button>
+          <button class="btn primary" type="submit">添加到列表</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="jobs-data.js"></script>
+  <script>
+    const data = window.JOBS_DATA || { jobs: [] };
+    const BASE_SOURCE_URL = data.sourceUrl || "https://docs.qq.com/smartsheet/DVUxMWFNiSmtkb3Bx?tab=th1cKO";
+    const MANUAL_KEY = "resumeApplyDeskManualJobsV1";
+    data.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+    const state = {
+      category: "all",
+      query: "",
+      sheet: "all",
+      sort: "updated",
+      status: "all",
+      directOnly: false,
+    };
+
+    const STATUS_KEY = "resumeApplyDeskStatusV1";
+    let jobStatus = {};
+    try {
+      jobStatus = JSON.parse(localStorage.getItem(STATUS_KEY) || "{}");
+    } catch {
+      jobStatus = {};
+    }
+
+    function normalizeManualJob(job) {
+      const normalized = {
+        id: job.id || `manual:${Date.now()}:${Math.random().toString(36).slice(2)}`,
+        rowId: job.rowId || "manual",
+        sourceSheetId: "manual",
+        sourceSheet: "手动添加",
+        sourceUrl: job.sourceUrl || BASE_SOURCE_URL,
+        category: job.category === "has_referral" ? "has_referral" : "no_referral",
+        company: job.company || "",
+        role: job.role || "",
+        deadline: job.deadline || "",
+        location: job.location || "",
+        industry: job.industry || "",
+        jobType: job.jobType || "",
+        degree: job.degree || "",
+        exam: job.exam || "",
+        progress: job.progress || "",
+        referralCode: job.referralCode || "",
+        referralLinks: Array.isArray(job.referralLinks) ? job.referralLinks : [],
+        primaryUrl: job.primaryUrl || "",
+        primaryUrlLabel: job.primaryUrlLabel || "投递",
+        urls: Array.isArray(job.urls) ? job.urls : [],
+        note: job.note || "",
+        updatedAt: job.updatedAt || new Date().toISOString().slice(0, 10),
+        fields: job.fields || {},
+        isManual: true,
+      };
+      normalized.searchText = buildSearchText(normalized);
+      return normalized;
+    }
+
+    function readManualJobs() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(MANUAL_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed.map(normalizeManualJob) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function persistManualJobs() {
+      localStorage.setItem(MANUAL_KEY, JSON.stringify(manualJobs));
+    }
+
+    function buildSearchText(job) {
+      return [
+        job.company,
+        job.role,
+        job.deadline,
+        job.location,
+        job.industry,
+        job.jobType,
+        job.degree,
+        job.referralCode,
+        job.note,
+        job.sourceSheet,
+        job.isManual ? "手动" : "",
+      ].join(" ").toLowerCase();
+    }
+
+    let manualJobs = readManualJobs();
+    data.jobs = [...manualJobs, ...data.jobs];
+    let duplicateMap = new Map();
+
+    function normalizeKeyText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[|｜·•,，。.\s/\\（）()【】\[\]_-]+/g, "")
+        .slice(0, 80);
+    }
+
+    function duplicateKey(job) {
+      const company = normalizeKeyText(job.company);
+      const role = normalizeKeyText(job.role);
+      if (!company || !role) return "";
+      return `${company}::${role}`;
+    }
+
+    function rebuildDuplicateMap() {
+      duplicateMap = new Map();
+      data.jobs.forEach(job => {
+        const key = duplicateKey(job);
+        if (!key) return;
+        if (!duplicateMap.has(key)) duplicateMap.set(key, []);
+        duplicateMap.get(key).push(job);
+      });
+    }
+
+    rebuildDuplicateMap();
+
+    const cardsEl = document.getElementById("cards");
+    const emptyEl = document.getElementById("emptyState");
+    const resultCountEl = document.getElementById("resultCount");
+    const sheetFilter = document.getElementById("sheetFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const dialog = document.getElementById("detailDialog");
+    const dialogTitle = document.getElementById("dialogTitle");
+    const dialogBody = document.getElementById("dialogBody");
+    const manualDialog = document.getElementById("manualDialog");
+    const manualForm = document.getElementById("manualForm");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function setupHeader() {
+      document.getElementById("pageTitle").textContent = "简历投递工作台";
+      document.getElementById("sourceLine").innerHTML = `岗位来源：<a href="${escapeHtml(BASE_SOURCE_URL)}" target="_blank" rel="noreferrer">腾讯文档原始链接</a> · ${escapeHtml(data.title || "岗位合集")} · 同步时间 ${escapeHtml(data.fetchedAt || "")}`;
+      updateStats();
+      refreshSheetOptions();
+      resetFilters(false);
+    }
+
+    function updateStats() {
+      const hasReferral = data.jobs.filter(job => job.category === "has_referral").length;
+      document.getElementById("statTotal").textContent = data.jobs.length;
+      document.getElementById("statReferral").textContent = hasReferral;
+      document.getElementById("statNoReferral").textContent = data.jobs.length - hasReferral;
+    }
+
+    function refreshSheetOptions() {
+      const current = state.sheet || "all";
+      const sheets = [...new Set(data.jobs.map(job => job.sourceSheet).filter(Boolean))].sort((a, b) => {
+        if (a === "手动添加") return -1;
+        if (b === "手动添加") return 1;
+        return a.localeCompare(b, "zh-CN");
+      });
+      sheetFilter.innerHTML = `<option value="all">全部表页</option>` + sheets.map(sheet =>
+        `<option value="${escapeHtml(sheet)}">${escapeHtml(sheet)}</option>`
+      ).join("");
+      sheetFilter.value = sheets.includes(current) ? current : "all";
+      state.sheet = sheetFilter.value;
+    }
+
+    function resetFilters(shouldRender = true) {
+      state.category = "all";
+      state.query = "";
+      state.sheet = "all";
+      state.sort = "updated";
+      state.status = "all";
+      state.directOnly = false;
+      document.getElementById("searchInput").value = "";
+      document.getElementById("sheetFilter").value = "all";
+      document.getElementById("sortSelect").value = "updated";
+      document.getElementById("statusFilter").value = "all";
+      document.getElementById("directOnly").checked = false;
+      document.querySelectorAll(".segmented button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.category === "all");
+      });
+      if (shouldRender) render();
+    }
+
+    function parseDateValue(value) {
+      if (!value) return 0;
+      const match = String(value).match(/20\d{2}[-/.年]\d{1,2}[-/.月]\d{1,2}/);
+      if (!match) return 0;
+      const normalized = match[0].replace("年", "-").replace("月", "-").replace("日", "").replace(/[/.]/g, "-");
+      return Date.parse(normalized) || 0;
+    }
+
+    function filteredJobs() {
+      const query = state.query.trim().toLowerCase();
+      const jobs = data.jobs
+        .filter(job => state.category === "all" || job.category === state.category)
+        .filter(job => state.sheet === "all" || job.sourceSheet === state.sheet)
+        .filter(job => {
+          const saved = getStatus(job) === "saved";
+          return state.status === "all" || (state.status === "saved" ? saved : !saved);
+        })
+        .filter(job => !state.directOnly || Boolean(job.primaryUrl))
+        .filter(job => !query || (job.searchText || "").includes(query))
+        .sort((a, b) => {
+          if (state.sort === "company") return String(a.company).localeCompare(String(b.company), "zh-CN");
+          if (state.sort === "deadline") return parseDateValue(b.deadline) - parseDateValue(a.deadline);
+          return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+        });
+      return jobs;
+    }
+
+    function compact(value, fallback = "未标注") {
+      const text = String(value || "").trim();
+      return text || fallback;
+    }
+
+    function meta(label, value) {
+      return `<div class="meta-item"><span>${label}</span><strong>${escapeHtml(compact(value, "未标注"))}</strong></div>`;
+    }
+
+    function getStatus(job) {
+      return jobStatus[job.id] === "saved" ? "saved" : "pending";
+    }
+
+    function setSaved(jobId, saved) {
+      if (!saved) {
+        delete jobStatus[jobId];
+      } else {
+        jobStatus[jobId] = "saved";
+      }
+      localStorage.setItem(STATUS_KEY, JSON.stringify(jobStatus));
+      render();
+    }
+
+    function statusLabel(status) {
+      return status === "saved" ? "已收藏" : "未收藏";
+    }
+
+    function statusBadge(job) {
+      const status = getStatus(job);
+      return status === "saved" ? `<span class="badge status saved">${statusLabel(status)}</span>` : "";
+    }
+
+    function fieldLinks(info) {
+      return (info.urls || []).map(item =>
+        `<a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.label || item.url)}</a>`
+      ).join("");
+    }
+
+    function detailRow(label, value, links = "") {
+      const hasValue = value && String(value).trim();
+      const content = `${hasValue ? escapeHtml(value) : ""}${links}`;
+      if (!content.trim()) return "";
+      return `
+        <div class="detail-row">
+          <div class="detail-label">${escapeHtml(label)}</div>
+          <div class="detail-value">${content}</div>
+        </div>
+      `;
+    }
+
+    function detailSection(title, rows) {
+      const body = rows.filter(Boolean).join("");
+      if (!body) return "";
+      return `<section class="detail-section"><div class="detail-section-title">${escapeHtml(title)}</div><div class="detail-list">${body}</div></section>`;
+    }
+
+    function inlineDetail(job) {
+      const entries = Object.entries(job.fields || {})
+        .filter(([, info]) => (info.value && String(info.value).trim()) || (info.urls && info.urls.length));
+      const directLinks = (job.urls || []).map(item =>
+        `<a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.label || item.url)}</a>`
+      ).join("");
+      const referralLinks = (job.referralLinks || []).map(item =>
+        `<a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.label || item.url)}</a>`
+      ).join("");
+      return [
+        detailSection("投递信息", [
+          detailRow("直达链接", "", directLinks),
+          detailRow("内推码", job.referralCode),
+          detailRow("内推链接", "", referralLinks),
+          detailRow("来源表页", job.sourceSheet, `<a href="${escapeHtml(job.sourceUrl)}" target="_blank" rel="noreferrer">打开原表</a>`),
+          detailRow("更新时间", job.updatedAt),
+        ]),
+        detailSection("岗位说明", [
+          detailRow("岗位", job.role),
+          detailRow("补充信息", job.note),
+          detailRow("笔试/进度", [job.exam, job.progress].filter(Boolean).join("\n")),
+        ]),
+        detailSection("原始字段", entries.map(([name, info]) =>
+          detailRow(name, info.value || "", fieldLinks(info))
+        )),
+      ].join("");
+    }
+
+    function cardTemplate(job) {
+      const isReferral = job.category === "has_referral";
+      const primaryClass = job.primaryUrl ? "btn primary" : "btn disabled";
+      const primaryHref = job.primaryUrl ? `href="${escapeHtml(job.primaryUrl)}" target="_blank" rel="noreferrer"` : "";
+      const status = getStatus(job);
+      const saveLabel = status === "saved" ? "取消收藏" : "收藏";
+      const referralParts = [];
+      if (job.referralCode) {
+        referralParts.push(`<div class="referral"><span>内推码 <code>${escapeHtml(job.referralCode)}</code></span><button class="copy-btn" data-copy="${escapeHtml(job.referralCode)}">复制</button></div>`);
+      }
+      if (job.referralLinks && job.referralLinks.length) {
+        const link = job.referralLinks[0];
+        referralParts.push(`<div class="referral link"><span>内推链接</span><a href="${escapeHtml(link.url)}" target="_blank" rel="noreferrer">打开</a></div>`);
+      }
+      const referral = referralParts.join("");
+      return `
+        <article class="card ${isReferral ? "has-referral" : "no-referral"}">
+          <div class="card-head">
+            <div class="badges">
+              <span class="badge ${isReferral ? "ref" : "none"}">${isReferral ? "有内推" : "普通投递"}</span>
+              ${job.isManual ? `<span class="badge manual">手动</span>` : ""}
+              <span class="badge sheet">${escapeHtml(job.sourceSheet)}</span>
+              ${statusBadge(job)}
+            </div>
+            <h2 class="company">${escapeHtml(compact(job.company))}</h2>
+            <p class="role">${escapeHtml(compact(job.role, "岗位信息见详情"))}</p>
+          </div>
+          <div class="card-body">
+            <div class="meta">
+              ${meta("截止/时间", job.deadline)}
+              ${meta("地点", job.location)}
+              ${meta("行业", job.industry)}
+              ${meta("类型/对象", job.jobType || job.degree)}
+            </div>
+            ${referral}
+            <div class="note">${escapeHtml(compact(job.note, "更多 JD、福利、笔试、投递细节可在详情中查看。"))}</div>
+            <div class="actions">
+              <a class="${primaryClass}" ${primaryHref}>去投递</a>
+              <button class="btn" data-detail="${escapeHtml(job.id)}">查看详情</button>
+            </div>
+            <div class="workflow-actions">
+              <button class="btn ${status === "saved" ? "is-active" : ""}" data-save="${escapeHtml(job.id)}" data-save-next="${status === "saved" ? "false" : "true"}">${saveLabel}</button>
+              <button class="btn" data-detail="${escapeHtml(job.id)}">全部信息</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function render() {
+      const jobs = filteredJobs();
+      resultCountEl.textContent = `当前显示 ${jobs.length} / ${data.jobs.length} 个岗位`;
+      emptyEl.hidden = jobs.length > 0;
+      cardsEl.innerHTML = jobs.map(cardTemplate).join("");
+    }
+
+    function showDetail(jobId) {
+      const job = data.jobs.find(item => item.id === jobId);
+      if (!job) return;
+      dialogTitle.textContent = `${job.company} - ${job.role}`;
+      const linkRows = (job.urls || []).map(item =>
+        `<div><a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.label || item.url)}</a></div>`
+      ).join("");
+      const rows = Object.entries(job.fields || {}).map(([name, info]) => {
+        const links = (info.urls || []).map(item =>
+          `<div><a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.label || item.url)}</a></div>`
+        ).join("");
+        return `<tr><th>${escapeHtml(name)}</th><td>${escapeHtml(info.value || "")}${links}</td></tr>`;
+      }).join("");
+      const applyButton = job.primaryUrl
+        ? `<a class="btn primary" href="${escapeHtml(job.primaryUrl)}" target="_blank" rel="noreferrer">去投递</a>`
+        : `<span class="btn disabled">暂无直达链接</span>`;
+      const status = getStatus(job);
+      dialogBody.innerHTML = `
+        <div class="dialog-actions">
+          ${applyButton}
+          <button class="btn ${status === "saved" ? "is-active" : ""}" data-save="${escapeHtml(job.id)}" data-save-next="${status === "saved" ? "false" : "true"}">${status === "saved" ? "取消收藏" : "收藏"}</button>
+        </div>
+        <table class="field-table">
+          <tbody>
+            <tr><th>分类</th><td>${job.category === "has_referral" ? "有内推码/内推链接" : "无内推码"}</td></tr>
+            <tr><th>收藏状态</th><td>${escapeHtml(statusLabel(status))}</td></tr>
+            <tr><th>添加方式</th><td>${job.isManual ? "手动添加" : "腾讯文档同步"}</td></tr>
+            <tr><th>来源表页</th><td><a href="${escapeHtml(job.sourceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(job.sourceSheet)}</a></td></tr>
+            <tr><th>直达链接</th><td>${linkRows || "未提取到链接"}</td></tr>
+            <tr><th>内推码</th><td>${escapeHtml(job.referralCode || "未提取到内推码")}</td></tr>
+            <tr><th>内推链接</th><td>${(job.referralLinks || []).map(item => `<div><a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.label || item.url)}</a></div>`).join("") || "未提取到内推链接"}</td></tr>
+            <tr><th>更新时间</th><td>${escapeHtml(job.updatedAt || "未标注")}</td></tr>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+      dialog.showModal();
+    }
+
+    function toggleInlineDetail(button) {
+      const jobId = button.dataset.toggleDetail;
+      const job = data.jobs.find(item => item.id === jobId);
+      if (!job) return;
+      const panel = document.getElementById(`detail-${jobId}`);
+      if (!panel) return;
+      const isOpen = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", String(!isOpen));
+      button.querySelector("span").textContent = isOpen ? "MISSION INTEL" : "COLLAPSE INTEL";
+      panel.classList.toggle("open", !isOpen);
+      if (!isOpen && !panel.dataset.rendered) {
+        panel.innerHTML = inlineDetail(job);
+        panel.dataset.rendered = "true";
+      }
+    }
+
+    function cleanUrl(value) {
+      return String(value || "").trim();
+    }
+
+    function textValue(formData, key) {
+      return String(formData.get(key) || "").trim();
+    }
+
+    function fieldValue(value) {
+      return { value, urls: [] };
+    }
+
+    function makeManualJob(formData) {
+      const applyUrl = cleanUrl(formData.get("applyUrl"));
+      const referralLink = cleanUrl(formData.get("referralLink"));
+      const referralCode = textValue(formData, "referralCode");
+      const sourceUrl = cleanUrl(formData.get("sourceUrl")) || BASE_SOURCE_URL;
+      const company = textValue(formData, "company");
+      const role = textValue(formData, "role");
+      const deadline = textValue(formData, "deadline");
+      const location = textValue(formData, "location");
+      const industry = textValue(formData, "industry");
+      const jobType = textValue(formData, "jobType");
+      const note = textValue(formData, "note");
+      const hasReferral = formData.get("category") === "has_referral" || Boolean(referralCode || referralLink);
+      const urls = applyUrl ? [{ label: "投递", url: applyUrl }] : [];
+      const referralLinks = referralLink ? [{ label: "内推链接", url: referralLink }] : [];
+      const job = {
+        id: `manual:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 8)}`,
+        rowId: "manual",
+        sourceSheetId: "manual",
+        sourceSheet: "手动添加",
+        sourceUrl,
+        category: hasReferral ? "has_referral" : "no_referral",
+        company,
+        role,
+        deadline,
+        location,
+        industry,
+        jobType,
+        degree: "",
+        exam: "",
+        progress: "",
+        referralCode,
+        referralLinks,
+        primaryUrl: applyUrl,
+        primaryUrlLabel: applyUrl ? "投递" : "",
+        urls,
+        note,
+        updatedAt: new Date().toISOString().slice(0, 10),
+        isManual: true,
+        fields: {
+          "公司名称": fieldValue(company),
+          "岗位/JD": fieldValue(role),
+          "截止/时间": fieldValue(deadline),
+          "地点": fieldValue(location),
+          "行业": fieldValue(industry),
+          "类型/对象": fieldValue(jobType),
+          "投递链接": { value: applyUrl ? "投递" : "", urls },
+          "内推码": fieldValue(referralCode),
+          "内推链接": { value: referralLink ? "内推链接" : "", urls: referralLinks },
+          "岗位来源": { value: "来源链接", urls: [{ label: "来源链接", url: sourceUrl }] },
+          "补充信息": fieldValue(note),
+        },
+      };
+      job.searchText = buildSearchText(job);
+      return job;
+    }
+
+    function openManualDialog() {
+      manualForm.reset();
+      document.getElementById("manualSourceUrl").value = BASE_SOURCE_URL;
+      manualDialog.showModal();
+      setTimeout(() => document.getElementById("manualCompany").focus(), 0);
+    }
+
+    function addManualJob(job) {
+      manualJobs.unshift(job);
+      data.jobs.unshift(job);
+      persistManualJobs();
+      rebuildDuplicateMap();
+      updateStats();
+      refreshSheetOptions();
+      resetFilters(false);
+      render();
+    }
+
+    document.addEventListener("click", event => {
+      const saveButton = event.target.closest("[data-save]");
+      if (saveButton) {
+        setSaved(saveButton.dataset.save, saveButton.dataset.saveNext === "true");
+        return;
+      }
+      const toggleButton = event.target.closest("[data-toggle-detail]");
+      if (toggleButton) {
+        toggleInlineDetail(toggleButton);
+        return;
+      }
+      const detailButton = event.target.closest("[data-detail]");
+      if (detailButton) showDetail(detailButton.dataset.detail);
+      const copyButton = event.target.closest("[data-copy]");
+      if (copyButton) {
+        navigator.clipboard?.writeText(copyButton.dataset.copy);
+        copyButton.textContent = "已复制";
+        setTimeout(() => { copyButton.textContent = "复制"; }, 1200);
+      }
+      const tabButton = event.target.closest(".segmented button");
+      if (tabButton) {
+        document.querySelectorAll(".segmented button").forEach(btn => btn.classList.remove("active"));
+        tabButton.classList.add("active");
+        state.category = tabButton.dataset.category;
+        render();
+      }
+    });
+
+    document.getElementById("searchInput").addEventListener("input", event => {
+      state.query = event.target.value;
+      render();
+    });
+
+    sheetFilter.addEventListener("change", event => {
+      state.sheet = event.target.value;
+      render();
+    });
+
+    document.getElementById("sortSelect").addEventListener("change", event => {
+      state.sort = event.target.value;
+      render();
+    });
+
+    statusFilter.addEventListener("change", event => {
+      state.status = event.target.value;
+      render();
+    });
+
+    document.getElementById("resetFilters").addEventListener("click", () => {
+      resetFilters(true);
+    });
+
+    document.getElementById("directOnly").addEventListener("change", event => {
+      state.directOnly = event.target.checked;
+      render();
+    });
+
+    document.getElementById("dialogClose").addEventListener("click", () => dialog.close());
+    document.getElementById("openManualForm").addEventListener("click", openManualDialog);
+    document.getElementById("manualClose").addEventListener("click", () => manualDialog.close());
+    document.getElementById("manualCancel").addEventListener("click", () => manualDialog.close());
+    manualForm.addEventListener("submit", event => {
+      event.preventDefault();
+      addManualJob(makeManualJob(new FormData(manualForm)));
+      manualDialog.close();
+    });
+
+    setupHeader();
+    render();
+  </script>
+</body>
+</html>
