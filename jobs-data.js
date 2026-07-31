@@ -1,7 +1,7 @@
 window.JOBS_DATA = {
   "title": "27届暑期实习&秋招提前批信息整理汇总表（欢迎分享到同学群，就业群）",
   "sourceUrl": "https://docs.qq.com/smartsheet/DVUxMWFNiSmtkb3Bx?tab=th1cKO",
-  "fetchedAt": "2026-07-30 01:26:42",
+  "fetchedAt": "2026-07-31 01:52:45",
   "total": 1209,
   "hasReferral": 196,
   "noReferral": 1013,
