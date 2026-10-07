@@ -1,7 +1,7 @@
 window.JOBS_DATA = {
   "title": "27届秋招提前批&秋招信息整理汇总表（欢迎分享到同学群，就业群）",
   "sourceUrl": "https://docs.qq.com/smartsheet/DVUxMWFNiSmtkb3Bx?tab=th1cKO",
-  "fetchedAt": "2026-10-06 03:51:33",
+  "fetchedAt": "2026-10-07 03:19:21",
   "total": 196,
   "hasReferral": 196,
   "noReferral": 0,
